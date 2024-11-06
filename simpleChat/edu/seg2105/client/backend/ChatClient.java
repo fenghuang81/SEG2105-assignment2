@@ -62,11 +62,60 @@ public class ChatClient extends AbstractClient {
      */
     public void handleMessageFromClientUI(String message) {
         try {
-            sendToServer(message);
+            if (message.startsWith("#")) {
+                handleCommand(message);
+            } else {
+                sendToServer(message);
+            }
         } catch (IOException e) {
             clientUI.display("Could not send message to server.  Terminating client.");
             quit();
         }
+    }
+
+    /**
+     * Handles a command (prefix of "#") that a user may input.
+     * 
+     * @param command The command to be processed.
+     */
+    private void handleCommand(String command) {
+        // Check what command is being called
+        if (command.startsWith("#quit")) {
+            quit();
+        } else if (command.startsWith("#logoff")) {
+            try {
+                closeConnection();
+            } catch (IOException e) {
+            }
+        } else if (command.startsWith("#sethost")) {
+            if (!isConnected()) {
+                setHost(command.split("\\s")[1]);
+            } else {
+                clientUI.display("Error, client is still logged in");
+            }
+        } else if (command.startsWith("#setport")) {
+            if (!isConnected()) {
+                setPort(Integer.parseInt(command.split("\\s")[1]));
+            } else {
+                clientUI.display("Error, client is still logged in");
+            }
+        } else if (command.startsWith("#login")) {
+            if (!isConnected()) {
+                try {
+                    openConnection();
+                } catch (IOException e) {
+                }
+            } else {
+                clientUI.display("Error, client is still logged in");
+            }
+        } else if (command.startsWith("#gethost")) {
+            clientUI.display(getHost());
+        } else if (command.startsWith("#getport")) {
+            clientUI.display(String.valueOf(getPort()));
+        } else {
+            clientUI.display("Invalid command");
+        }
+
     }
 
     /**
