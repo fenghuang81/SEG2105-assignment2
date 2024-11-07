@@ -33,7 +33,7 @@ public class EchoServer extends AbstractServer {
     /**
      * Constructs an instance of the echo server.
      *
-     * @param port The port number to listen from.
+     * @param port     The port number to listen from.
      * @param clientUI The interface type variable.
      */
     public EchoServer(int port, ChatIF serverUI) throws IOException {
@@ -63,11 +63,64 @@ public class EchoServer extends AbstractServer {
      */
     public void handleMessageFromServerUI(String message) {
         if (message.startsWith("#")) {
-//                handleCommand(message);
+            handleCommand(message);
         } else {
             serverUI.display(message);
             sendToAllClients("SERVER MSG> " + message);
         }
+    }
+
+    /**
+     * Handles a command (prefix of "#") that a user may input.
+     * 
+     * @param command The command to be processed.
+     */
+    private void handleCommand(String command) {
+        // Check what command is being called
+        if (command.startsWith("#quit")) {
+            // Closes and exits
+            quit();
+        } else if (command.startsWith("#stop")) {
+            // Stops listening for new connections
+            stopListening();
+        } else if (command.startsWith("#close")) {
+            // Closes (which stops listening and disconnects all clients)
+            try {
+                close();
+            } catch (IOException e) {
+            }
+        } else if (command.startsWith("#setport")) {
+            if (!isListening() && getClientConnections().length == 0) {
+                setPort(Integer.parseInt(command.split("\\s")[1]));
+            } else {
+                serverUI.display("Error, server has not been closed.");
+            }
+        } else if (command.startsWith("#start")) {
+            if (!isListening()) {
+                try {
+                    listen();
+                } catch (IOException e) {
+                }
+            } else {
+                serverUI.display("Error, server has not been stopped.");
+            }
+        } else if (command.startsWith("#getport")) {
+            serverUI.display(String.valueOf(getPort()));
+        } else {
+            serverUI.display("Invalid command");
+        }
+
+    }
+
+    /**
+     * This method terminates the client.
+     */
+    public void quit() {
+        try {
+            close();
+        } catch (IOException e) {
+        }
+        System.exit(0);
     }
 
     /**
