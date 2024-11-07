@@ -160,5 +160,18 @@ public class ChatClient extends AbstractClient {
     protected void connectionClosed() {
         clientUI.display("Connection is closed");
     }
+    
+    /**
+     * Implements the hook method called after a connection has been established. The default
+     * implementation does nothing. It may be overridden by subclasses to do
+     * anything they wish.
+     */
+    @Override
+    protected void connectionEstablished() {
+        try {
+            sendToServer("#login " + loginid);
+        } catch (IOException e) {
+        }
+    }
 }
 //End of ChatClient class
