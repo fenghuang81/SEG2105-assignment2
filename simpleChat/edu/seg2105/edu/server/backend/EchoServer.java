@@ -27,6 +27,11 @@ public class EchoServer extends AbstractServer {
      * method in the client.
      */
     ChatIF serverUI;
+    
+    /**
+     * Whether closed() has been called (which sets the socket to null)
+     */
+    boolean isClosed;
 
     // Constructors ****************************************************
 
@@ -90,7 +95,7 @@ public class EchoServer extends AbstractServer {
             } catch (IOException e) {
             }
         } else if (command.startsWith("#setport")) {
-            if (!isListening() && getClientConnections().length == 0) {
+            if (isClosed) {
                 setPort(Integer.parseInt(command.split("\\s")[1]));
             } else {
                 serverUI.display("Error, server has not been closed.");
@@ -160,6 +165,17 @@ public class EchoServer extends AbstractServer {
     @Override
     synchronized protected void clientDisconnected(ConnectionToClient client) {
         System.out.println(client + " has disconnected");
+    }
+    
+    /**
+     * Implements the hook method called when the server is closed.
+     * The default implementation does nothing. This method may be
+     * overridden by subclasses. When the server is closed while still
+     * listening, serverStopped() will also be called.
+     */
+    @Override
+    protected void serverClosed() {
+        isClosed = true;
     }
 }
 //End of EchoServer class
