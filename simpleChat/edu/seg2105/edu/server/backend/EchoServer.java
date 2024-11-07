@@ -20,6 +20,13 @@ import ocsf.server.*;
  * @author Paul Holden
  */
 public class EchoServer extends AbstractServer {
+    // Class variables *************************************************
+    
+    /**
+     * The key for getting a client's loginid
+     */
+    String loginKey = "loginid";
+
     // Instance variables **********************************************
 
     /**
@@ -27,7 +34,7 @@ public class EchoServer extends AbstractServer {
      * method in the client.
      */
     ChatIF serverUI;
-    
+
     /**
      * Whether closed() has been called (which sets the socket to null)
      */
@@ -58,7 +65,27 @@ public class EchoServer extends AbstractServer {
     @Override
     public void handleMessageFromClient(Object msg, ConnectionToClient client) {
         System.out.println("Message received: " + msg + " from " + client);
-        this.sendToAllClients(msg);
+
+        String msgStr = (String) msg;
+
+        // Check whether to echo or not
+        if (msgStr.startsWith("#login")) {
+            // If already logged in
+            if (client.getInfo(loginKey) != null) {
+                try { // Send an error message to the client and terminate the connection
+                    client.sendToClient("Error, already logged in. Terminating connection.");
+                    client.close();
+                } catch (IOException e) {
+                }
+            }
+            // Set the loginid key's value (2nd item from split)
+            String loginid = msgStr.split("\\s")[1];
+            client.setInfo(loginKey, loginid);
+        } else {
+            // Echo the message with their loginid prefixed
+            String loginid = (String) client.getInfo(loginKey);
+            this.sendToAllClients(loginid + "> " + msgStr);
+        }
     }
 
     /**
@@ -166,12 +193,12 @@ public class EchoServer extends AbstractServer {
     synchronized protected void clientDisconnected(ConnectionToClient client) {
         System.out.println(client + " has disconnected");
     }
-    
+
     /**
-     * Implements the hook method called when the server is closed.
-     * The default implementation does nothing. This method may be
-     * overridden by subclasses. When the server is closed while still
-     * listening, serverStopped() will also be called.
+     * Implements the hook method called when the server is closed. The default
+     * implementation does nothing. This method may be overridden by subclasses.
+     * When the server is closed while still listening, serverStopped() will also be
+     * called.
      */
     @Override
     protected void serverClosed() {
