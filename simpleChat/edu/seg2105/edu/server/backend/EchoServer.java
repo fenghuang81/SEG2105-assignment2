@@ -1,6 +1,10 @@
 package edu.seg2105.edu.server.backend;
 // This file contains material supporting section 3.7 of the textbook:
 
+import java.io.IOException;
+
+import edu.seg2105.client.common.ChatIF;
+
 // "Object Oriented Software Engineering" and is issued under the open-source
 // license found at www.lloseng.com 
 
@@ -16,22 +20,26 @@ import ocsf.server.*;
  * @author Paul Holden
  */
 public class EchoServer extends AbstractServer {
-    // Class variables *************************************************
+    // Instance variables **********************************************
 
     /**
-     * The default port to listen on.
+     * The interface type variable. It allows the implementation of the display
+     * method in the client.
      */
-    final public static int DEFAULT_PORT = 5555;
+    ChatIF serverUI;
 
     // Constructors ****************************************************
 
     /**
      * Constructs an instance of the echo server.
      *
-     * @param port The port number to connect on.
+     * @param port The port number to listen from.
+     * @param clientUI The interface type variable.
      */
-    public EchoServer(int port) {
-        super(port);
+    public EchoServer(int port, ChatIF serverUI) throws IOException {
+        super(port); // Call the superclass constructor
+        this.serverUI = serverUI;
+        listen(); // Start listening for connections
     }
 
     // Instance methods ************************************************
@@ -42,9 +50,24 @@ public class EchoServer extends AbstractServer {
      * @param msg    The message received from the client.
      * @param client The connection from which the message originated.
      */
+    @Override
     public void handleMessageFromClient(Object msg, ConnectionToClient client) {
         System.out.println("Message received: " + msg + " from " + client);
         this.sendToAllClients(msg);
+    }
+
+    /**
+     * This method handles all data coming from the UI
+     *
+     * @param message The message from the UI.
+     */
+    public void handleMessageFromServerUI(String message) {
+        if (message.startsWith("#")) {
+//                handleCommand(message);
+        } else {
+            serverUI.display(message);
+            sendToAllClients("SERVER MSG> " + message);
+        }
     }
 
     /**
@@ -61,33 +84,6 @@ public class EchoServer extends AbstractServer {
      */
     protected void serverStopped() {
         System.out.println("Server has stopped listening for connections.");
-    }
-
-    // Class methods ***************************************************
-
-    /**
-     * This method is responsible for the creation of the server instance (there is
-     * no UI in this phase).
-     *
-     * @param args[0] The port number to listen on. Defaults to 5555 if no argument
-     *                is entered.
-     */
-    public static void main(String[] args) {
-        int port = 0; // Port to listen on
-
-        try {
-            port = Integer.parseInt(args[0]); // Get port from command line
-        } catch (Throwable t) {
-            port = DEFAULT_PORT; // Set port to 5555
-        }
-
-        EchoServer sv = new EchoServer(port);
-
-        try {
-            sv.listen(); // Start listening for connections
-        } catch (Exception ex) {
-            System.out.println("ERROR - Could not listen for clients!");
-        }
     }
 
     /**
