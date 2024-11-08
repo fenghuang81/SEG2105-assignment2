@@ -170,6 +170,7 @@ public class ChatClient extends AbstractClient {
     protected void connectionEstablished() {
         try {
             sendToServer("#login " + loginid);
+            System.out.println(loginid + " has logged on.");
         } catch (IOException e) {
         }
     }

@@ -72,7 +72,7 @@ public class ServerConsole implements ChatIF {
      */
     @Override
     public void display(String message) {
-        System.out.println("SERVER MSG> " + message);
+        System.out.println(message);
     }
 
     // Class methods ***************************************************

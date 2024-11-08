@@ -21,7 +21,7 @@ import ocsf.server.*;
  */
 public class EchoServer extends AbstractServer {
     // Class variables *************************************************
-    
+
     /**
      * The key for getting a client's loginid
      */
@@ -64,7 +64,7 @@ public class EchoServer extends AbstractServer {
      */
     @Override
     public void handleMessageFromClient(Object msg, ConnectionToClient client) {
-        System.out.println("Message received: " + msg + " from " + client);
+        System.out.println("Message received: " + msg + " from " + client.getInfo(loginKey) + ".");
 
         String msgStr = (String) msg;
 
@@ -77,10 +77,12 @@ public class EchoServer extends AbstractServer {
                     client.close();
                 } catch (IOException e) {
                 }
+            } else {
+                // Set the loginid key's value (2nd item from split)
+                String loginid = msgStr.split("\\s")[1];
+                client.setInfo(loginKey, loginid);
+                System.out.println(loginid + " has logged on.");
             }
-            // Set the loginid key's value (2nd item from split)
-            String loginid = msgStr.split("\\s")[1];
-            client.setInfo(loginKey, loginid);
         } else {
             // Echo the message with their loginid prefixed
             String loginid = (String) client.getInfo(loginKey);
@@ -97,8 +99,8 @@ public class EchoServer extends AbstractServer {
         if (message.startsWith("#")) {
             handleCommand(message);
         } else {
-            serverUI.display(message);
-            sendToAllClients("SERVER MSG> " + message);
+            serverUI.display("SERVER MESSAGE> " + message);
+            sendToAllClients("SERVER MESSAGE> " + message);
         }
     }
 
@@ -179,7 +181,7 @@ public class EchoServer extends AbstractServer {
      */
     @Override
     protected void clientConnected(ConnectionToClient client) {
-        System.out.println(client + " has connected");
+        System.out.println("A new client has connected to the server.");
     }
 
     /**
@@ -191,7 +193,7 @@ public class EchoServer extends AbstractServer {
      */
     @Override
     synchronized protected void clientDisconnected(ConnectionToClient client) {
-        System.out.println(client + " has disconnected");
+        System.out.println(client.getInfo(loginKey) + " has disconnected.");
     }
 
     /**

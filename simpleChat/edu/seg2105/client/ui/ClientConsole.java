@@ -53,7 +53,7 @@ public class ClientConsole implements ChatIF {
             client = new ChatClient(loginid, host, port, this);
 
         } catch (IOException exception) {
-            System.out.println("Error: Can't setup connection!" + " Terminating client.");
+            System.out.println("ERROR - Can't setup connection! Terminating client.");
             System.exit(1);
         }
 
@@ -89,7 +89,7 @@ public class ClientConsole implements ChatIF {
      */
     @Override
     public void display(String message) {
-        System.out.println("> " + message);
+        System.out.println(message);
     }
 
     // Class methods ***************************************************
@@ -111,7 +111,7 @@ public class ClientConsole implements ChatIF {
         } catch (ArrayIndexOutOfBoundsException e) {
             // If no args are entered
             if (loginid.isEmpty()) {
-                System.out.println("Error, no loginid. Terminating client.");
+                System.out.println("ERROR - No login ID specified. Connection aborted.");
                 System.exit(1);
             }
             host = "localhost";
